@@ -1,5 +1,7 @@
+// lib/tax.ts
 import { supabase } from '@/lib/supabaseClient';
 import { format } from 'date-fns';
+
 
 export type TaxSummary = {
   income: number;
@@ -28,7 +30,7 @@ export type ParsedTransaction = {
   category: string;
 };
 
-// 🧠 Auto-categorization fallback
+
 export function autoCategorize(description: string): string {
   const desc = description.toLowerCase();
   if (desc.includes('uber') || desc.includes('train')) return 'Transport';
@@ -41,14 +43,14 @@ export function autoCategorize(description: string): string {
 export async function parseCSV(file: File): Promise<ParsedTransaction[]> {
   const text = await file.text();
   const lines = text.split('\n').filter(Boolean);
-  const rows = lines.slice(1); // skip header
+  const rows = lines.slice(1);
 
   const parsed: ParsedTransaction[] = [];
 
   for (const line of rows) {
     const [date, amount, vendor, category] = line.split(',');
 
-    if (!date || !amount || !vendor) continue; // skip malformed rows
+    if (!date || !amount || !vendor) continue;
 
     const parsedAmount = parseFloat(amount.trim());
 
@@ -63,30 +65,43 @@ export async function parseCSV(file: File): Promise<ParsedTransaction[]> {
   return parsed;
 }
 
-// 📊 Supabase-powered tax summary
+
 export async function fetchTaxData(userId: string): Promise<TaxData> {
   const { data: transactions, error } = await supabase
     .from('transactions')
-    .select('*')
+    .select('id, date, amount, type, user_id, category')
     .eq('user_id', userId);
 
-  if (error || !transactions) {
-    console.error('Error fetching transactions:', error);
+  if (error) {
+    console.error('❌ Error fetching transactions:', error.message);
     return {
       summary: { income: 0, expenses: 0, net: 0, estimatedTax: 0 },
       monthlyBreakdown: [],
     };
   }
 
+  if (!transactions || transactions.length === 0) {
+    console.warn('⚠️ No transactions found for user:', userId);
+    return {
+      summary: { income: 0, expenses: 0, net: 0, estimatedTax: 0 },
+      monthlyBreakdown: [],
+    };
+  }
+
+  console.log('✅ Raw transactions from Supabase:', transactions);
+
   const monthlySummary: Record<string, { income: number; expenses: number }> = {};
 
-  transactions.forEach((tx) => {
+  transactions.forEach((tx: any) => {
+    if (!tx.date || !tx.amount) return;
+
     const month = format(new Date(tx.date), 'MMMM yyyy');
     if (!monthlySummary[month]) {
       monthlySummary[month] = { income: 0, expenses: 0 };
     }
 
-    const amount = typeof tx.amount === 'string' ? parseFloat(tx.amount) : tx.amount;
+    const amount =
+      typeof tx.amount === 'string' ? parseFloat(tx.amount) : Number(tx.amount);
 
     if (tx.type === 'income') {
       monthlySummary[month].income += amount;
@@ -108,7 +123,7 @@ export async function fetchTaxData(userId: string): Promise<TaxData> {
   const netProfit = totalIncome - totalExpenses;
   const estimatedTax = netProfit > 0 ? netProfit * 0.2 : 0;
 
-  return {
+  const result: TaxData = {
     summary: {
       income: totalIncome,
       expenses: totalExpenses,
@@ -117,4 +132,7 @@ export async function fetchTaxData(userId: string): Promise<TaxData> {
     },
     monthlyBreakdown,
   };
+
+  console.log('📊 TaxData result:', result);
+  return result;
 }

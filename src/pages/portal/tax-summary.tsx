@@ -1,3 +1,4 @@
+// pages/TaxSummaryPage.tsx
 import { useEffect, useState } from 'react';
 import { useUser } from '@supabase/auth-helpers-react';
 import { fetchTaxData, TaxData } from '@/lib/tax';
@@ -12,14 +13,16 @@ import {
 } from 'recharts';
 import { ArrowTrendingUpIcon, ArrowTrendingDownIcon } from '@heroicons/react/24/solid';
 
-export default function TaxSummaryPage() {
+function TaxSummaryPage() {
   const user = useUser();
   const [data, setData] = useState<TaxData | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (user?.id) {
-      fetchTaxData(user.id).then(res => {
+      console.log('👤 Supabase user ID:', user.id);
+      fetchTaxData(user.id).then((res) => {
+        console.log('📦 Tax data response:', res);
         setData(res);
         setLoading(false);
       });
@@ -29,6 +32,16 @@ export default function TaxSummaryPage() {
   const summary = data?.summary;
   const breakdown = data?.monthlyBreakdown || [];
 
+  if (!user) {
+    return (
+      <Layout>
+        <div className="min-h-screen flex items-center justify-center text-gray-600">
+          Loading user session...
+        </div>
+      </Layout>
+    );
+  }
+
   return (
     <Layout>
       <div className="min-h-screen bg-gray-50 px-6 py-10 space-y-10">
@@ -36,7 +49,7 @@ export default function TaxSummaryPage() {
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-3xl font-bold text-gray-800">📊 Your Tax Summary</h1>
-            <p className="text-sm text-gray-500">Updated as of September 2025</p>
+            <p className="text-sm text-gray-500">Updated as of {new Date().toLocaleDateString()}</p>
           </div>
           <button
             onClick={() => exportCSV(breakdown)}
@@ -46,12 +59,11 @@ export default function TaxSummaryPage() {
           </button>
         </div>
 
-        {/* Loading / Empty States */}
         {loading ? (
           <div className="bg-white border border-gray-200 rounded p-4 text-sm text-gray-600 shadow">
             Fetching your financial data... hang tight.
           </div>
-        ) : !data ? (
+        ) : !data || breakdown.length === 0 ? (
           <div className="bg-yellow-50 border border-yellow-200 rounded p-4 text-sm text-yellow-800 shadow">
             No data found. Try uploading transactions or linking your account.
           </div>
@@ -63,9 +75,10 @@ export default function TaxSummaryPage() {
               <NetProfitGraph breakdown={breakdown} />
             </div>
 
-            {/* 📅 Monthly Breakdown Section */}
             <section className="mt-8">
-              <h2 className="text-xl font-semibold text-gray-700 mb-4">📅 Monthly Breakdown</h2>
+              <h2 className="text-xl font-semibold text-gray-700 mb-4">
+                📅 Monthly Breakdown
+              </h2>
               <BreakdownTable breakdown={breakdown} />
             </section>
           </>
@@ -75,9 +88,9 @@ export default function TaxSummaryPage() {
   );
 }
 
-// ----------------------
-// Types
-// ----------------------
+(TaxSummaryPage as any).requiresAuth = true;
+export default TaxSummaryPage;
+
 
 interface Summary {
   income: number;
@@ -94,20 +107,15 @@ interface MonthlyBreakdownItem {
   estimatedTax: number;
 }
 
-// ----------------------
-// Currency Formatter
-// ----------------------
-
 const formatCurrency = (value: number): string =>
-  `£${value.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-
-// ----------------------
-// CSV Export
-// ----------------------
+  `£${value.toLocaleString(undefined, {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  })}`;
 
 function exportCSV(data: MonthlyBreakdownItem[]) {
   const headers = ['Month', 'Income', 'Expenses', 'Net', 'Estimated Tax'];
-  const rows = data.map(row => [
+  const rows = data.map((row) => [
     row.month,
     row.income.toFixed(2),
     row.expenses.toFixed(2),
@@ -115,21 +123,20 @@ function exportCSV(data: MonthlyBreakdownItem[]) {
     row.estimatedTax.toFixed(2),
   ]);
 
-  const csvContent = [headers, ...rows].map(r => r.join(',')).join('\n');
+  const csvContent = [headers, ...rows].map((r) => r.join(',')).join('\n');
   const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
   const url = URL.createObjectURL(blob);
 
   const link = document.createElement('a');
   link.href = url;
-  link.setAttribute('download', `tax-summary-${new Date().toISOString().slice(0, 10)}.csv`);
+  link.setAttribute(
+    'download',
+    `tax-summary-${new Date().toISOString().slice(0, 10)}.csv`
+  );
   document.body.appendChild(link);
   link.click();
   document.body.removeChild(link);
 }
-
-// ----------------------
-// SummaryCard
-// ----------------------
 
 function SummaryCard({ summary }: { summary: Summary }) {
   const items = [
@@ -152,7 +159,9 @@ function SummaryCard({ summary }: { summary: Summary }) {
           <div>
             <p className="text-sm text-gray-500">{item.label}</p>
             <div className="flex items-center space-x-1">
-              <p className="text-lg font-semibold text-gray-800">{formatCurrency(item.value)}</p>
+              <p className="text-lg font-semibold text-gray-800">
+                {formatCurrency(item.value)}
+              </p>
               {item.trend === 'up' && (
                 <ArrowTrendingUpIcon className="h-4 w-4 text-green-500" />
               )}
@@ -167,34 +176,34 @@ function SummaryCard({ summary }: { summary: Summary }) {
   );
 }
 
-// ----------------------
-// NetProfitGraph
-// ----------------------
-
 function NetProfitGraph({ breakdown }: { breakdown: MonthlyBreakdownItem[] }) {
-  const formatted = breakdown.map(item => ({
+  const formatted = breakdown.map((item) => ({
     month: item.month,
     net: item.net,
   }));
 
   return (
     <div className="bg-white rounded-lg shadow p-6">
-      <h3 className="text-lg font-medium text-gray-800 mb-2">📈 Net Profit Trend</h3>
+      <h3 className="text-lg font-medium text-gray-800 mb-2">
+        📈 Net Profit Trend
+      </h3>
       <ResponsiveContainer width="100%" height={200}>
         <LineChart data={formatted}>
           <XAxis dataKey="month" />
           <YAxis />
           <Tooltip formatter={(value: number) => formatCurrency(value)} />
-          <Line type="monotone" dataKey="net" stroke="#3b82f6" strokeWidth={2} dot={false} />
+          <Line
+            type="monotone"
+            dataKey="net"
+            stroke="#3b82f6"
+            strokeWidth={2}
+            dot={false}
+          />
         </LineChart>
       </ResponsiveContainer>
     </div>
   );
 }
-
-// ----------------------
-// BreakdownTable
-// ----------------------
 
 function BreakdownTable({ breakdown }: { breakdown: MonthlyBreakdownItem[] }) {
   return (
@@ -215,13 +224,17 @@ function BreakdownTable({ breakdown }: { breakdown: MonthlyBreakdownItem[] }) {
               <td className="px-4 py-3">{row.month}</td>
               <td className="px-4 py-3">{formatCurrency(row.income)}</td>
               <td className="px-4 py-3">{formatCurrency(row.expenses)}</td>
-              <td className={`px-4 py-3 ${row.net < 0 ? 'text-red-500' : 'text-green-600'}`}>
+              <td
+                className={`px-4 py-3 ${
+                  row.net < 0 ? 'text-red-500' : 'text-green-600'
+                }`}
+              >
                 {formatCurrency(row.net)}
               </td>
               <td className="px-4 py-3">{formatCurrency(row.estimatedTax)}</td>
             </tr>
           ))}
-              </tbody>
+        </tbody>
       </table>
     </div>
   );

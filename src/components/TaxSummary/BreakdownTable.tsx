@@ -19,7 +19,7 @@ export const BreakdownTable = ({ data }: { data: MonthlyBreakdown[] }) => {
             <td>£{row.income}</td>
             <td>£{row.expenses}</td>
             <td>£{row.net}</td>
-            <td>£{row.tax}</td>
+            <td>£{row.estimatedTax}</td>
           </tr>
         ))}
       </tbody>

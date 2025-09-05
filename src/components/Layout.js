@@ -62,11 +62,6 @@ export default function Layout({ children }) {
       {/* Page Content */}
       <main className="flex-grow w-full max-w-screen-xl mx-auto px-8 py-12">
         {children}
-
-        {/* AI Assistant Banner */}
-        <div className="bg-indigo-100 text-[#3f3d56] text-sm px-6 py-3 text-center shadow-sm hover:bg-indigo-200 transition cursor-pointer">
-          💬 Need help? Click your personal AI assistant in the bottom-right corner.
-        </div>
       </main>
 
       {/* AI Chatbot Assistant */}

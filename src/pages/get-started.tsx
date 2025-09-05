@@ -28,43 +28,29 @@ export default function GetStarted() {
   };
 
   return (
-    <main className="max-w-7xl mx-auto px-6 py-16 space-y-32">
+    <main className="max-w-7xl mx-auto px-6 py-16 space-y-32 bg-[#f4f5f7]">
 
       {/* Hero Section */}
-      <motion.section 
-        className="text-center space-y-6 bg-gradient-to-r from-[#6C63FF]/20 to-[#EDECFB] rounded-3xl p-14 shadow-2xl"
-        initial="hidden" animate="visible" variants={fadeUp}
-      >
-        <h1 className="text-5xl sm:text-6xl font-extrabold text-[#3f3d56]">
-          Welcome to <span className="text-[#6C63FF]">TaxMateAI</span>
-        </h1>
-        <p className="text-xl text-gray-700 max-w-3xl mx-auto">
-          Your smart tax assistant powered by artificial intelligence. Automate, simplify, and save more.
-        </p>
-        <div className="mt-8">
-          <Link 
-            href="/signup" 
-            className="bg-gradient-to-r from-[#6C63FF] to-[#5a54d4] text-white px-10 py-4 rounded-full font-semibold hover:scale-105 transition-transform shadow-xl hover:shadow-2xl"
-          >
-            Get Started
-          </Link>
-        </div>
-      </motion.section>
+     <motion.section 
+  className="text-center space-y-6 bg-white rounded-3xl p-14 shadow-2xl"
+  initial="hidden" animate="visible" variants={fadeUp}
+>
+  <h1 className="text-5xl sm:text-6xl font-extrabold text-[#3f3d56] leading-snug">
+    Welcome to <span className="text-[#6C63FF]">TaxMateAI</span>
+  </h1>
+  <p className="text-xl text-gray-700 max-w-3xl mx-auto leading-relaxed">
+    Your smart tax assistant powered by artificial intelligence. <span className="font-medium text-[#6C63FF]">Automate</span>, <span className="font-medium text-[#6C63FF]">simplify</span>, and <span className="font-medium text-[#6C63FF]">save more</span>.
+  </p>
+  <div className="mt-8">
+    <Link 
+      href="/signup" 
+      className="bg-[#6C63FF] text-white px-10 py-4 rounded-full font-semibold hover:scale-105 transition-transform shadow-xl hover:shadow-2xl"
+    >
+      Sign Up
+    </Link>
+  </div>
+</motion.section>
 
-      {/* About Section */}
-      <motion.section 
-        id="about" 
-        className="space-y-6 text-center sm:text-left"
-        initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp}
-      >
-        <h2 className="text-3xl font-bold text-[#3f3d56] text-center sm:text-left">About TaxMateAI</h2>
-        <p className="text-gray-700 max-w-4xl">
-          TaxMateAI simplifies tax management for individuals and businesses. Our AI analyzes your financial data to uncover deductions, prepare accurate reports, and ensure compliance effortlessly.
-        </p>
-        <p className="text-gray-700 max-w-4xl">
-          From freelancers to small business owners, TaxMateAI reduces errors, saves time, and maximizes your savings. With secure data handling and seamless integrations, managing taxes has never been easier.
-        </p>
-      </motion.section>
 
       {/* Features Section */}
       <motion.section 
@@ -72,12 +58,12 @@ export default function GetStarted() {
         className="space-y-12"
         initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp}
       >
-        <h2 className="text-3xl font-bold text-[#3f3d56] text-center sm:text-left">Key Features</h2>
+        <h2 className="text-3xl font-bold text-[#1d1d1f] text-center sm:text-left">Key Features</h2>
         <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-8">
           {features.map(({ title, desc, icon }, idx) => (
             <motion.div 
               key={title} 
-              className="bg-white p-6 rounded-2xl shadow-lg hover:shadow-2xl transition hover:scale-105"
+              className="bg-[#e9ebf0] p-6 rounded-2xl shadow-lg hover:shadow-2xl transition hover:scale-105"
               initial={{ opacity: 0, y: 20 }} 
               whileInView={{ opacity: 1, y: 0 }} 
               transition={{ delay: idx * 0.15 }}
@@ -99,12 +85,12 @@ export default function GetStarted() {
         className="space-y-12"
         initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp}
       >
-        <h2 className="text-3xl font-bold text-[#3f3d56] text-center sm:text-left">How It Works</h2>
+        <h2 className="text-3xl font-bold text-[#1d1d1f] text-center sm:text-left">How It Works</h2>
         <div className="grid sm:grid-cols-1 md:grid-cols-3 gap-8">
           {steps.map(({ title, desc, icon }, idx) => (
             <motion.div 
               key={title} 
-              className="bg-gradient-to-tr from-[#EDECFB] to-[#f3f3fd] p-6 rounded-2xl shadow-lg hover:shadow-2xl transition hover:scale-105 text-center"
+              className="bg-white p-6 rounded-2xl shadow-md hover:shadow-xl transition hover:scale-105 text-center"
               initial={{ opacity: 0, y: 20 }} 
               whileInView={{ opacity: 1, y: 0 }} 
               transition={{ delay: idx * 0.15 }}
@@ -124,12 +110,12 @@ export default function GetStarted() {
         className="space-y-12"
         initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp}
       >
-        <h2 className="text-3xl font-bold text-[#3f3d56] text-center sm:text-left">What Our Users Say</h2>
+        <h2 className="text-3xl font-bold text-[#1d1d1f] text-center sm:text-left">What Our Users Say</h2>
         <div className="grid sm:grid-cols-1 md:grid-cols-3 gap-8">
           {testimonials.map(({ name, text }, idx) => (
             <motion.div 
               key={name} 
-              className="bg-[#f3f3fd] p-6 rounded-2xl shadow-lg hover:shadow-2xl transition hover:scale-105 text-center"
+              className="bg-[#e9ebf0] p-6 rounded-2xl shadow-md hover:shadow-xl transition hover:scale-105 text-center"
               initial={{ opacity: 0, y: 20 }} 
               whileInView={{ opacity: 1, y: 0 }} 
               transition={{ delay: idx * 0.15 }}

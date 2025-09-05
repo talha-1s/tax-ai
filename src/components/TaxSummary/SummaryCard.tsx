@@ -5,7 +5,8 @@ export function SummaryCard({ data }: { data: TaxSummary }) {
     { label: 'Total Income', value: data.income },
     { label: 'Total Expenses', value: data.expenses },
     { label: 'Net Profit', value: data.net },
-    { label: 'Estimated Tax', value: data.tax },
+    { label: 'Estimated Tax', value: data.estimatedTax },
+
   ]
 
   return (

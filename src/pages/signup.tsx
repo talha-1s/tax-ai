@@ -138,7 +138,7 @@ const handleSubmit = async (e: React.FormEvent) => {
   if (!validateStep()) return;
 
   try {
-    // Step 1: Create user in Supabase Auth
+    // Step 1: Sign up with Supabase Auth
     const { data, error } = await supabase.auth.signUp({
       email: formData.email,
       password: formData.password,
@@ -149,38 +149,40 @@ const handleSubmit = async (e: React.FormEvent) => {
       return;
     }
 
-    // Step 2: Insert full profile into public.users
+    // Step 2: Insert profile in custom users table
     if (data?.user?.id) {
-  const { error: insertError } = await supabase.from("users").upsert([
-  {
-    id: data.user.id,
-    email: formData.email,
-    full_name: formData.full_name,
-    phone_number: `${formData.country_code}${formData.phone_number}`,
-    occupation: formData.occupation,
-    ni_number: formData.ni_number,
-    dob: formData.dob,
-    start_date: new Date().toISOString().split("T")[0],
-    account_method: formData.account_method === "other"
-      ? formData.account_method_other
-      : formData.account_method,
-  },
-]);
+      const { error: insertError } = await supabase.from("users").upsert([
+        {
+          id: data.user.id,
+          email: formData.email,
+          full_name: formData.full_name,
+          phone_number: `${formData.country_code}${formData.phone_number}`,
+          occupation: formData.occupation,
+          ni_number: formData.ni_number,
+          dob: formData.dob,
+          start_date: new Date().toISOString().split("T")[0],
+          account_method: formData.account_method === "other"
+            ? formData.account_method_other
+            : formData.account_method,
+        },
+      ]);
 
+      if (insertError) {
+        setErrors({ general: `Profile insert error: ${insertError.message}` });
+        return;
+      }
 
-  if (insertError) {
-    setErrors({ general: `Profile insert error: ${insertError.message}` });
-    return;
-  }
+      setSuccess(true);
 
-  setSuccess(true);
-}
-
+      // redirect to login after 2s
+      setTimeout(() => router.push("/login"), 2000);
+    }
   } catch (err) {
     setErrors({ general: "Unexpected error occurred. Please try again later." });
     console.error(err);
   }
 };
+
 
 
 

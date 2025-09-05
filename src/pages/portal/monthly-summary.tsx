@@ -333,3 +333,5 @@ export default function MonthlySummary() {
     </>
   );
 }
+
+MonthlySummary.requiresAuth = true;

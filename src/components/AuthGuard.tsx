@@ -1,7 +1,7 @@
-// components/AuthGuard.tsx
+// src/components/AuthGuard.tsx
 import { useEffect, useState, createContext, useContext, ReactNode } from "react";
 import { useRouter } from "next/router";
-import { supabase } from "../lib/supabaseClient";
+import { supabase } from "@/lib/supabaseClient";
 import type { Session, User } from "@supabase/supabase-js";
 
 interface AuthContextType {
@@ -29,22 +29,27 @@ export default function AuthGuard({ children }: { children: ReactNode }) {
     let mounted = true;
 
     async function load() {
-      const { data: sessionData } = await supabase.auth.getSession();
-      const s = sessionData?.session;
+      const { data, error } = await supabase.auth.getSession();
+      const s = data?.session;
 
       if (!s) {
-        router.replace("/");
+        router.replace("/login");
         return;
       }
 
       if (!mounted) return;
       setSession(s);
 
-      const { data: prof } = await supabase
-        .from("users")
+      // fetch user profile from "profiles" table
+      const { data: prof, error: profError } = await supabase
+        .from("profiles")
         .select("*")
         .eq("id", s.user.id)
         .single();
+
+      if (profError) {
+        console.warn("Profile fetch error:", profError.message);
+      }
 
       if (!mounted) return;
       setProfile(prof || null);
@@ -57,7 +62,7 @@ export default function AuthGuard({ children }: { children: ReactNode }) {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, newSession) => {
       setSession(newSession);
-      if (!newSession) router.replace("/");
+      if (!newSession) router.replace("/login");
     });
 
     return () => {

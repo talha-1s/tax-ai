@@ -101,3 +101,6 @@ export default function TransactionsPage() {
     </Layout>
   );
 }
+
+// ✅ this line must be outside of the component
+TransactionsPage.requiresAuth = true;
